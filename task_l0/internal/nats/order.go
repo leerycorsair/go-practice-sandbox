@@ -13,6 +13,7 @@ func (h *NatsHandler) CreateOrder(m *stan.Msg) {
 	err := json.Unmarshal(m.Data, &order)
 	if err != nil {
 		logrus.Errorf("ERROR unmarshaling msg NATS:%s", err.Error())
+		return
 	}
 	_, err = h.services.CreateOrder(order)
 	if err != nil {
