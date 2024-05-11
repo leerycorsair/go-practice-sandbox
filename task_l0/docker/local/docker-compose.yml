@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  server: 
+    container_name: server
+    build:
+      context: ../..
+      dockerfile: ./docker/base/Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - custom-network
+    environment:
+      DB_PSWD: ${DB_PSWD}
+      CONFIG_FILE: ${CONFIG_FILE}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      nats-streaming:
+        condition: service_started
+    
+
+  postgres:
+    container_name: postgres
+    image: "postgres:alpine"
+    expose:
+      - 5432
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PSWD}
+      POSTGRES_DB: ${DB_NAME}
+    restart: unless-stopped
+    networks:
+      - custom-network
+    healthcheck:
+      test: pg_isready --dbname=$DB_NAME --username=$DB_USER
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrations:
+    container_name: migrations
+    build:
+      context: ../..
+      dockerfile: ./docker/base/Dockerfile.migrations
+    networks:
+      - custom-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      USER: ${DB_USER}
+      PSWD: ${DB_PSWD}
+      HOST: ${DB_HOST}:5432
+      DB: ${DB_NAME}
+      SSLMODE: disable
+
+  nats-streaming:
+    container_name: nats-streaming
+    image: "nats-streaming:latest"
+    restart: unless-stopped
+    networks:
+      - custom-network
+    ports:
+      - "${NATS_PORT}:${NATS_PORT}"
+      - "${NATS_PORT_HTTP}:${NATS_PORT_HTTP}"
+    command: "--cluster_id ${NATS_CLUSTER_ID} --http_port ${NATS_PORT_HTTP}"
+
+networks:
+  custom-network:
+
