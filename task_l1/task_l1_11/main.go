@@ -42,7 +42,7 @@ func (s1 *Set[T]) Intersect(s2 *Set[T]) *Set[T] {
 // defining Set string representation
 func (s *Set[T]) String() string {
 	keys := make([]string, 0)
-	for key, _ := range s.values {
+	for key := range s.values {
 		keys = append(keys, fmt.Sprint(key))
 	}
 	var str string = "Set [" + strings.Join(keys, " ") + "]"
