@@ -50,9 +50,7 @@ func Anagram(strs []string) map[string][]string {
 	for _, strs := range sortedKeyMap {
 		if len(strs) > 1 {
 			sort.Strings(strs)
-			for _, str := range strs {
-				res[strs[0]] = append(res[strs[0]], str)
-			}
+			res[strs[0]] = append(res[strs[0]], strs...)
 		}
 	}
 
