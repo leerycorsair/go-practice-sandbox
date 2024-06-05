@@ -31,6 +31,10 @@ func sortedStr(src string) string {
 	return strings.Join(dst, "")
 }
 
+// Anagram is a function to find all sets of anagrams.
+//
+//	Input:[]string{"пятак", "пятка", "тяпка"}
+//	Output:map[string][]string{"пятак": {"пятак", "пятка", "тяпка"}
 func Anagram(strs []string) map[string][]string {
 	// forming a set of anagrams, where the key is a sorted string
 	sortedKeyMap := make(map[string][]string, len(strs))
