@@ -1,5 +1,16 @@
 package main
 
+import (
+	"develop/dev11/internal/handler"
+	inMemoryRep "develop/dev11/internal/repository/in_memory_rep"
+	baseService "develop/dev11/internal/service/base_service"
+	"develop/dev11/internal/storage"
+	"log"
+	"net/http"
+	"os"
+	"sync"
+)
+
 /*
 === HTTP server ===
 
@@ -23,5 +34,24 @@ package main
 */
 
 func main() {
+	storage := storage.NewCalendarStorage(&sync.RWMutex{})
+	repo, err := inMemoryRep.NewInMemoryRep(storage)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
+	service, err := baseService.NewCalendarService(repo)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	handler, err := handler.NewCalendarHandlers(http.NewServeMux(), service)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	if err := handler.Run("localhost:8080"); err != nil {
+		log.Print(err.Error())
+		os.Exit(1)
+	}
 }
